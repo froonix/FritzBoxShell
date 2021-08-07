@@ -295,7 +295,10 @@ DSLstate() {
 	location="/upnp/control/wandslifconfig1"
 	uri="urn:dslforum-org:service:WANDSLInterfaceConfig:1"
 
-	action='GetInfo'
+	action='X_AVM-DE_GetDSLInfo'
+	readout
+
+	action='GetStatisticsTotal'
 	readout
 }
 
