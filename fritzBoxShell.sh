@@ -146,7 +146,7 @@ LEDswitch(){
 }
 
 ### ----------------------------------------------------------------------------------------------------- ###
-### ------ FUNCTION LEDbrighness FOR SETTING THE BRIGHNTESS OF THE LEDS IN front of the Fritz!Box ------- ###
+### ------ FUNCTION LEDbrightness FOR SETTING THE BRIGHTNESS OF THE LEDS IN front of the Fritz!Box ------ ###
 ### ----------------------------- Here the TR-064 protocol cannot be used. ------------------------------ ###
 ### ----------------------------------------------------------------------------------------------------- ###
 ### ---------------------------------------- AHA-HTTP-Interface ----------------------------------------- ###
@@ -384,43 +384,37 @@ WANstate() {
 }
 
 ### ----------------------------------------------------------------------------------------------------- ###
-### -------------------------------- FUNCTION WANreconnect - TR-064 Protocol -------------------------------- ###
+### ------------------------------ FUNCTION WANreconnect - TR-064 Protocol ------------------------------ ###
 ### ----------------------------------------------------------------------------------------------------- ###
 
 WANreconnect() {
+	#Display IP Address before reconnect
+	location="/igdupnp/control/WANIPConn1"
+	uri="urn:schemas-upnp-org:service:WANIPConnection:1"
 
-    #Display IP Address before reconnect
-    location="/igdupnp/control/WANIPConn1"
-    uri="urn:schemas-upnp-org:service:WANIPConnection:1"
-    action='GetConnectionTypeInfo'
+	action='GetExternalIPAddress'
+	readout
 
-    action='GetExternalIPAddress'
+	location="/igdupnp/control/WANIPConn1"
+	uri="urn:schemas-upnp-org:service:WANIPConnection:1"
+	action='ForceTermination'
 
-    readout
+	echo ""
+	echo "WAN RECONNECT initiated - Waiting for new IP... (30 seconds)"
 
-    location="/igdupnp/control/WANIPConn1"
-		uri="urn:schemas-upnp-org:service:WANIPConnection:1"
-		action='ForceTermination'
+	curl -s "http://$BoxIP:49000$location" -H 'Content-Type: text/xml; charset="utf-8"' -H "SoapAction:$uri#$action" -d "<?xml version='1.0' encoding='utf-8'?> <s:Envelope s:encodingStyle='http://schemas.xmlsoap.org/soap/encoding/' xmlns:s='http://schemas.xmlsoap.org/soap/envelope/'> <s:Body> <u:$action xmlns:u='$uri' /> </s:Body> </s:Envelope>" &>/dev/null
 
-    echo ""
-    echo "WAN RECONNECT initiated - Waiting for new IP... (30 seconds)"
+	sleep 30
 
-    curl -s "http://$BoxIP:49000$location" -H 'Content-Type: text/xml; charset="utf-8"' -H "SoapAction:$uri#$action" -d "<?xml version='1.0' encoding='utf-8'?> <s:Envelope s:encodingStyle='http://schemas.xmlsoap.org/soap/encoding/' xmlns:s='http://schemas.xmlsoap.org/soap/envelope/'> <s:Body> <u:$action xmlns:u='$uri' /> </s:Body> </s:Envelope>" &>/dev/null
+	echo ""
+	echo "FINISHED. Find new IP Address below:"
 
-    sleep 30
+	#Display IP Address after reconnect
+	location="/igdupnp/control/WANIPConn1"
+	uri="urn:schemas-upnp-org:service:WANIPConnection:1"
 
-    echo ""
-    echo "FINISHED. Find new IP Address below:"
-
-    #Display IP Address after reconnect
-    location="/igdupnp/control/WANIPConn1"
-    uri="urn:schemas-upnp-org:service:WANIPConnection:1"
-    action='GetConnectionTypeInfo'
-
-    action='GetExternalIPAddress'
-
-    readout
-
+	action='GetExternalIPAddress'
+	readout
 }
 
 ### ----------------------------------------------------------------------------------------------------- ###
@@ -778,7 +772,7 @@ else
 		fi
 	elif [ "$option1" = "WAN" ]; then
 		if [ "$option2" = "STATE" ]; then WANstate "$option2";
-  elif [ "$option2" = "RECONNECT" ]; then WANreconnect "$option2";
+		elif [ "$option2" = "RECONNECT" ]; then WANreconnect "$option2";
 		else DisplayArguments
 		fi
 	elif [ "$option1" = "LINK" ]; then
